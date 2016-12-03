@@ -3,39 +3,48 @@
     android:layout_width="match_parent" android:layout_height="match_parent"
     tools:context=".ItemDetailActivity" tools:ignore="MergeRootFrame" >
 
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="213dp"
-        android:text="chatt"
-        android:id="@+id/chattwindow"
-        android:background="@android:color/holo_red_dark"
-        android:layout_gravity="left|top"
-        android:layout_alignParentLeft="true"
-        android:layout_marginLeft="0dp"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="0dp"
-        android:layout_above="@+id/sendtext" />
-
-    <EditText
-        android:layout_width="match_parent"
-        android:layout_height="66dp"
-        android:id="@+id/sendtext"
-        android:layout_gravity="center"
-        android:background="@android:color/holo_blue_light"
-        android:text="sendtext"
-        android:layout_alignRight="@+id/bsend"
-        android:layout_alignEnd="@+id/bsend"
-        android:layout_alignParentBottom="true" />
-
-    <Button
+    <ListView
+        android:id="@+id/msgListView"
         android:layout_width="wrap_content"
+        android:listSelector="@android:color/transparent"
         android:layout_height="wrap_content"
-        android:text="Send"
-        android:id="@+id/bsend"
-        android:layout_gravity="center"
-        android:layout_alignTop="@+id/sendtext"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_above="@+id/form"
+        android:divider="@null"
+        android:dividerHeight="0dp"
+        android:paddingBottom="10dp"
+        android:text="@string/hello_world" />
 
+    <LinearLayout
+        android:id="@+id/form"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:background="#91f1f1f1"
+        android:orientation="horizontal"
+        android:paddingBottom="2dp" >
+
+
+        <EditText
+            android:id="@+id/messageEditText"
+            android:layout_width="252dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:background="@android:color/transparent"
+            android:layout_alignTop="@+id/button1"
+            android:layout_toLeftOf="@+id/sendMessageButton"
+            android:layout_weight="0.72"
+            android:ems="10"
+            android:maxHeight="80dp" />
+
+        <ImageButton
+            android:id="@+id/sendMessageButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:background="@drawable/send_button"
+            android:text="d" />
+    </LinearLayout>
 </RelativeLayout>

@@ -9,45 +9,49 @@ import android.util.Log;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.pette.server.common.ChatMessage;
+
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.chatt.gerdovci.chattapp.ItemDetailActivity.chatAdapter;
 
 public class UpdateConvo extends AsyncTask<Void, Void, Void> {
 
     String response = "";
-    TextView textResponse;
+    ChatAdapter myChatAdapter;
+    List<ChatMessage> messages = new ArrayList<>();
 
-    public UpdateConvo(TextView textResponse) {
-        this.textResponse = textResponse;
+    public UpdateConvo(ChatAdapter chatAdapter) {
+        myChatAdapter = chatAdapter;
     }
 
     @Override
     protected Void doInBackground(Void... arg0) {
         Socket socket = null;
         try {
-            socket = new Socket("192.168.1.67", 8080);
+            socket = new Socket(ItemDetailActivity.IP_ADDRESS, 8080);
             Log.d("PETTE", "in here");
 
 
             DataOutputStream dOut = new DataOutputStream(socket.getOutputStream());
             // Send first message
             //dOut.writeByte(1);
-            String sendText = "GET UPDATECONVO";
+            String sendText="GET UPDATECONVO";
 
+            sendText +=  "!#" +  chatAdapter.getCount();
+            Log.d("PETTE", "send text:" + sendText);
             dOut.writeUTF(sendText);
             dOut.flush(); // Send off the data
 
-
-            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(
-                    1024);
-            byte[] buffer = new byte[1024];
-
-            int bytesRead;
             InputStream inputStream = socket.getInputStream();
 
 
@@ -58,22 +62,21 @@ public class UpdateConvo extends AsyncTask<Void, Void, Void> {
             }
 
             Log.d("PETTE", "Will read stream now");
-          /*
-          * notice: inputStream.read() will block if no data return
-          */
-            socket.setSoTimeout(1000);
+            socket.setSoTimeout(400);
+
             Log.d("PETTE", "Reading");
-            while ((bytesRead = inputStream.read(buffer)) != -1) {
-                byteArrayOutputStream.write(buffer, 0, bytesRead);
-                response += byteArrayOutputStream.toString("UTF-8");
-                Log.d("PETTE", response);
-                break;
-            }
+
+            ObjectInputStream objectInputStream = new ObjectInputStream(
+                    inputStream);
+
+            messages = (List<ChatMessage>) objectInputStream.readObject();
+
+            objectInputStream.close();
             inputStream.close();
 
         } catch (SocketTimeoutException e) {
             Log.d("PETTE", e.toString());
-        }catch (UnknownHostException e) {
+        } catch (UnknownHostException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
             response = "UnknownHostException: " + e.toString();
@@ -81,7 +84,9 @@ public class UpdateConvo extends AsyncTask<Void, Void, Void> {
             // TODO Auto-generated catch block
             e.printStackTrace();
             response = "IOException: " + e.toString();
-        }  finally {
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } finally {
             if (socket != null) {
                 try {
                     socket.close();
@@ -95,9 +100,7 @@ public class UpdateConvo extends AsyncTask<Void, Void, Void> {
 
     @Override
     protected void onPostExecute(Void result) {
-        if (response.length() != 0) {
-            textResponse.setText(response);
-        }
+        Client.sendTextMessage(messages);
         super.onPostExecute(result);
     }
 

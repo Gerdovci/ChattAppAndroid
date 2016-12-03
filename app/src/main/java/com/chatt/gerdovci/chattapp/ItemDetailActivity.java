@@ -1,52 +1,74 @@
 package com.chatt.gerdovci.chattapp;
 
+import android.app.ActionBar;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.StrictMode;
-import android.support.v4.os.AsyncTaskCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View.OnClickListener;
 import android.view.View;
-import android.view.Window;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
+import android.widget.ListView;
 
-import java.io.IOException;
-import java.net.Socket;
-import java.net.UnknownHostException;
-import java.util.Timer;
+import com.pette.server.common.ChatMessage;
+
+import java.util.ArrayList;
 import java.util.TimerTask;
 
 
 public class ItemDetailActivity extends ActionBarActivity {
 
+    public static String IP_ADDRESS = "83.227.68.101";
+    ListView msgListView;
+    public static ChatAdapter chatAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        //requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_item_detail);
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
 
         StrictMode.setThreadPolicy(policy);
 
-        // Show the Up button in the action bar.
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        // Set up your ActionBar
+        android.support.v7.app.ActionBar mActionBar = getSupportActionBar();
+        mActionBar.setDisplayShowHomeEnabled(false);
+        mActionBar.setDisplayShowTitleEnabled(false);
+        //Initializes the custom action bar layout
+        LayoutInflater mInflater = LayoutInflater.from(this);
+        View mCustomView = mInflater.inflate(R.layout.action_bar, null);
+        mActionBar.setCustomView(mCustomView);
+        mActionBar.setDisplayShowCustomEnabled(true);
 
 
         Log.d("PETTE", "on create");
 
-        final EditText msg = (EditText) findViewById(R.id.sendtext);
-        final Button send = (Button) findViewById(R.id.bsend);
-        final TextView convo = (TextView) findViewById(R.id.chattwindow);
+        final EditText msg = (EditText) findViewById(R.id.messageEditText);
+        View messageEditText = findViewById(R.id.sendMessageButton);
 
+        msgListView = (ListView) findViewById(R.id.msgListView);
+        msgListView.setClickable(false);
+        msgListView.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
+        msgListView.setStackFromBottom(true);
 
-        send.setOnClickListener(new OnClickListener() {
+        ArrayList<ChatMessage> chatlist = new ArrayList<>();
+        chatAdapter = new ChatAdapter(this, chatlist);
+        msgListView.setAdapter(chatAdapter);
+
+        messageEditText.setOnClickListener(new OnClickListener() {
 
             @Override
             public void onClick(View arg0) {
-                Client client = new Client(convo, msg);
+                Client client = new Client(chatAdapter, msg);
                 client.execute();
             }
         });
@@ -60,7 +82,7 @@ public class ItemDetailActivity extends ActionBarActivity {
 
                 try {
                     Log.d("PETTE", "Trying to update convo");
-                    UpdateConvo updateConvo = new UpdateConvo(convo);
+                    UpdateConvo updateConvo = new UpdateConvo(chatAdapter);
                     updateConvo.execute();
                 } catch (Exception e) {
                     Log.d("PETTE", e.getStackTrace().toString());
@@ -74,8 +96,9 @@ public class ItemDetailActivity extends ActionBarActivity {
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                handler2.postDelayed(doAsynchronousTask, 2000);
+                handler2.postDelayed(doAsynchronousTask, 400);
             }
+           // Looper.prepare();
         };
         runnable.run();
     }

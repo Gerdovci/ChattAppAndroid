@@ -55,7 +55,7 @@ public class Client extends AsyncTask<Void, Void, Void> {
                 sendText += "!#" +chatAdapter.getCount() ;
             }
 
-            Log.d("PETTE", "send text:" + sendText);
+            Log.d("CHATAPP", "send text:" + sendText);
 
             dOut.writeUTF(sendText);
             dOut.flush(); // Send off the data
@@ -107,6 +107,11 @@ public class Client extends AsyncTask<Void, Void, Void> {
         if (messages == null) {
             return;
         }
+
+        if(chatAdapter.getCount() == messages.size()){
+            return;
+        }
+
         int even = 0;
         for (ChatMessage chatMessage : messages) {
             if (!chatMessage.body.equalsIgnoreCase("")) {

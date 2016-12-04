@@ -7,12 +7,12 @@
         android:id="@+id/title_text"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_marginLeft="10dp"
+        android:layout_toLeftOf="@+id/btn_left"
         android:layout_toRightOf="@+id/btn_home"
         android:gravity="center"
         android:textColor="#fff"
         android:textStyle="bold"
-        android:text="World Chatt"/>
+        android:text="World Chat"/>
 
     <Button
         android:id="@+id/btn_home"

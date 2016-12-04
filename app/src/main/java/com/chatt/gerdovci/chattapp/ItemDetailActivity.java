@@ -1,10 +1,12 @@
 package com.chatt.gerdovci.chattapp;
 
 import android.app.ActionBar;
+import android.app.AlertDialog;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Message;
 import android.os.StrictMode;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
@@ -16,6 +18,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.pette.server.common.ChatMessage;
 
@@ -38,19 +41,10 @@ public class ItemDetailActivity extends ActionBarActivity {
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
 
         StrictMode.setThreadPolicy(policy);
-
-        // Set up your ActionBar
-        android.support.v7.app.ActionBar mActionBar = getSupportActionBar();
-        mActionBar.setDisplayShowHomeEnabled(false);
-        mActionBar.setDisplayShowTitleEnabled(false);
-        //Initializes the custom action bar layout
-        LayoutInflater mInflater = LayoutInflater.from(this);
-        View mCustomView = mInflater.inflate(R.layout.action_bar, null);
-        mActionBar.setCustomView(mCustomView);
-        mActionBar.setDisplayShowCustomEnabled(true);
+        setupActionBar();
 
 
-        Log.d("PETTE", "on create");
+        Log.d("CHATAPP", "on create");
 
         final EditText msg = (EditText) findViewById(R.id.messageEditText);
         View messageEditText = findViewById(R.id.sendMessageButton);
@@ -74,33 +68,75 @@ public class ItemDetailActivity extends ActionBarActivity {
         });
 
 
-        Log.d("PETTE", "we have done it");
 
-        final TimerTask doAsynchronousTask = new TimerTask() {
+
+        WorkerThread workerThread = new WorkerThread();
+        workerThread.start();
+
+
+        Thread runnable = new Thread() {
             @Override
             public void run() {
+                Log.d("CHATAPP","loop?");
+                Handler mHandler = new Handler(Looper.getMainLooper());
 
-                try {
-                    Log.d("PETTE", "Trying to update convo");
-                    UpdateConvo updateConvo = new UpdateConvo(chatAdapter);
-                    updateConvo.execute();
-                } catch (Exception e) {
-                    Log.d("PETTE", e.getStackTrace().toString());
-                    e.printStackTrace();
+
+
+                Log.d("CHATAPP", "Trying to update convo");
+                UpdateConvo updateConvo = new UpdateConvo(chatAdapter);
+                updateConvo.execute();
+                mHandler.postDelayed(this, 2000);
+                mHandler.sendEmptyMessage(1);
+            }
+        };
+
+        runnable.start();
+    }
+
+    class WorkerThread extends Thread {
+        public Handler mHandler;
+
+        public void run() {
+            Log.d("CHATAPP","Preparing loop");
+            Looper.prepare();
+
+            mHandler = new Handler() {
+                public void handleMessage(Message msg) {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
-            }
-        };
+            };
 
-        Log.d("PETTE", "Trying to schedule update convo");
-        final Handler handler2 = new Handler();
-        Runnable runnable = new Runnable() {
+            Looper.loop();
+        }
+    }
+
+    private void setupActionBar() {
+        // Set up your ActionBar
+        android.support.v7.app.ActionBar mActionBar = getSupportActionBar();
+        mActionBar.setDisplayShowHomeEnabled(false);
+        mActionBar.setDisplayShowTitleEnabled(false);
+        //Initializes the custom action bar layout
+        LayoutInflater mInflater = LayoutInflater.from(this);
+        View mCustomView = mInflater.inflate(R.layout.action_bar, null);
+        mActionBar.setCustomView(mCustomView);
+        mActionBar.setDisplayShowCustomEnabled(true);
+
+
+        Button homeButton = (Button)findViewById(R.id.btn_home);
+        homeButton.setEnabled(true);
+
+        homeButton.setOnClickListener(new OnClickListener() {
+
             @Override
-            public void run() {
-                handler2.postDelayed(doAsynchronousTask, 400);
+            public void onClick(View arg0) {
+                Toast.makeText(ItemDetailActivity.this, "Not supported yet.",
+                        Toast.LENGTH_SHORT).show();
             }
-           // Looper.prepare();
-        };
-        runnable.run();
+        });
     }
 
 

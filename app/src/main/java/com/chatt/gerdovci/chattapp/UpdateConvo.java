@@ -48,7 +48,7 @@ public class UpdateConvo extends AsyncTask<Void, Void, Void> {
             String sendText="GET UPDATECONVO";
 
             sendText +=  "!#" +  chatAdapter.getCount();
-            Log.d("PETTE", "send text:" + sendText);
+            Log.d("CHATAPP", "send text:" + sendText);
             dOut.writeUTF(sendText);
             dOut.flush(); // Send off the data
 
@@ -61,10 +61,10 @@ public class UpdateConvo extends AsyncTask<Void, Void, Void> {
                 return null;
             }
 
-            Log.d("PETTE", "Will read stream now");
+            Log.d("CHATAPP", "Will read stream now");
             socket.setSoTimeout(400);
 
-            Log.d("PETTE", "Reading");
+            Log.d("CHATAPP", "Reading");
 
             ObjectInputStream objectInputStream = new ObjectInputStream(
                     inputStream);
@@ -75,7 +75,7 @@ public class UpdateConvo extends AsyncTask<Void, Void, Void> {
             inputStream.close();
 
         } catch (SocketTimeoutException e) {
-            Log.d("PETTE", e.toString());
+            Log.d("CHATAPP", e.toString());
         } catch (UnknownHostException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

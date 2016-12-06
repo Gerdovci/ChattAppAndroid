@@ -2,6 +2,7 @@ package com.chatt.gerdovci.chattapp;
 
 import android.app.ActionBar;
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -133,8 +134,12 @@ public class ItemDetailActivity extends ActionBarActivity {
 
             @Override
             public void onClick(View arg0) {
-                Toast.makeText(ItemDetailActivity.this, "Not supported yet.",
-                        Toast.LENGTH_SHORT).show();
+                //Toast.makeText(ItemDetailActivity.this, "Not supported yet.",Toast.LENGTH_SHORT).show();
+
+
+                Intent intent = new Intent(ItemDetailActivity.this, MainActivity.class);
+                intent.putExtra("INFORMATION", "");
+                startActivity(intent);
             }
         });
     }

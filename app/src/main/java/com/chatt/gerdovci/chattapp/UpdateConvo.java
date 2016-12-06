@@ -61,7 +61,7 @@ public class UpdateConvo extends AsyncTask<Void, Void, Void> {
                 return null;
             }
 
-            Log.d("CHATAPP", "Will read stream now");
+            Log.d("CHATAPP", "Reading stream now.");
             socket.setSoTimeout(400);
 
             Log.d("CHATAPP", "Reading");

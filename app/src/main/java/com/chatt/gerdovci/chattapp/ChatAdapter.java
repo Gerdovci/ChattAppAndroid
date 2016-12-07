@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,7 +13,8 @@ import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.pette.server.common.ChatMessage;
+import com.pette.server.common.LoginRequest;
+import com.pette.server.common.SendMessage;
 
 
 /**
@@ -24,12 +24,14 @@ import com.pette.server.common.ChatMessage;
 public class ChatAdapter extends BaseAdapter {
 
     private static LayoutInflater inflater = null;
-    public ArrayList<ChatMessage> chatMessageList;
+    private LoginRequest myLoginRequest;
+    public ArrayList<SendMessage> chatMessageList;
 
-    public ChatAdapter(Activity activity, ArrayList<ChatMessage> list) {
+    public ChatAdapter(Activity activity, ArrayList<SendMessage> list, LoginRequest loginRequest) {
         chatMessageList = list;
         inflater = (LayoutInflater) activity
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        myLoginRequest = loginRequest;
 
     }
 
@@ -50,20 +52,20 @@ public class ChatAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        ChatMessage message = (ChatMessage) chatMessageList.get(position);
+        SendMessage message = (SendMessage) chatMessageList.get(position);
         View vi = convertView;
         if (convertView == null)
             vi = inflater.inflate(R.layout.chatbubble, null);
 
         TextView msg = (TextView) vi.findViewById(R.id.message_text);
-        msg.setText(message.body);
+        msg.setText(message.getMessageBody());
         LinearLayout layout = (LinearLayout) vi
                 .findViewById(R.id.bubble_layout);
         LinearLayout parent_layout = (LinearLayout) vi
                 .findViewById(R.id.bubble_layout_parent);
 
         // if message is mine then align to right
-        if (message.isMine) {
+        if (message.getSenderName().endsWith(myLoginRequest.getUsername())) {
             layout.setBackgroundResource(R.drawable.bubble2);
             parent_layout.setGravity(Gravity.RIGHT);
         }
@@ -76,7 +78,11 @@ public class ChatAdapter extends BaseAdapter {
         return vi;
     }
 
-    public void add(ChatMessage object) {
+    public void add(SendMessage object) {
         chatMessageList.add(object);
+    }
+
+    public SendMessage getMessage(int pos) {
+        return chatMessageList.get(pos);
     }
 }

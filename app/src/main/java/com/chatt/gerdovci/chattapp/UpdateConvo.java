@@ -6,12 +6,7 @@ package com.chatt.gerdovci.chattapp;
 
 import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.EditText;
-import android.widget.TextView;
-
-import com.pette.server.common.ChatMessage;
-
-import java.io.ByteArrayOutputStream;
+import com.pette.server.common.SendMessage;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,7 +23,7 @@ public class UpdateConvo extends AsyncTask<Void, Void, Void> {
 
     String response = "";
     ChatAdapter myChatAdapter;
-    List<ChatMessage> messages = new ArrayList<>();
+    List<SendMessage> messages = new ArrayList<>();
 
     public UpdateConvo(ChatAdapter chatAdapter) {
         myChatAdapter = chatAdapter;
@@ -69,7 +64,7 @@ public class UpdateConvo extends AsyncTask<Void, Void, Void> {
             ObjectInputStream objectInputStream = new ObjectInputStream(
                     inputStream);
 
-            messages = (List<ChatMessage>) objectInputStream.readObject();
+            messages = (List<SendMessage>) objectInputStream.readObject();
 
             objectInputStream.close();
             inputStream.close();

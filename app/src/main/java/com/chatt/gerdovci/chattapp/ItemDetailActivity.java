@@ -1,9 +1,7 @@
 package com.chatt.gerdovci.chattapp;
 
-import android.app.ActionBar;
-import android.app.AlertDialog;
+
 import android.content.Intent;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -15,16 +13,13 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View.OnClickListener;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.Toast;
-
-import com.pette.server.common.ChatMessage;
+import com.pette.server.common.LoginRequest;
+import com.pette.server.common.SendMessage;
 
 import java.util.ArrayList;
-import java.util.TimerTask;
 
 
 public class ItemDetailActivity extends ActionBarActivity {
@@ -55,15 +50,18 @@ public class ItemDetailActivity extends ActionBarActivity {
         msgListView.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
         msgListView.setStackFromBottom(true);
 
-        ArrayList<ChatMessage> chatlist = new ArrayList<>();
-        chatAdapter = new ChatAdapter(this, chatlist);
+
+        final LoginRequest loginRequest = new LoginRequest("pette","1234");
+
+        ArrayList<SendMessage> chatlist = new ArrayList<>();
+        chatAdapter = new ChatAdapter(this, chatlist, loginRequest);
         msgListView.setAdapter(chatAdapter);
 
         messageEditText.setOnClickListener(new OnClickListener() {
 
             @Override
             public void onClick(View arg0) {
-                Client client = new Client(chatAdapter, msg);
+                Client client = new Client(chatAdapter, msg, loginRequest);
                 client.execute();
             }
         });
@@ -72,7 +70,7 @@ public class ItemDetailActivity extends ActionBarActivity {
 
 
         WorkerThread workerThread = new WorkerThread();
-        workerThread.start();
+       // workerThread.start();
 
 
         Thread runnable = new Thread() {
@@ -91,7 +89,7 @@ public class ItemDetailActivity extends ActionBarActivity {
             }
         };
 
-        runnable.start();
+       // runnable.start();
     }
 
     class WorkerThread extends Thread {
@@ -142,6 +140,26 @@ public class ItemDetailActivity extends ActionBarActivity {
                 startActivity(intent);
             }
         });
+
+
+
+
+        Button optionButton = (Button)findViewById(R.id.btn_left);
+        optionButton.setEnabled(true);
+
+        optionButton.setOnClickListener(new OnClickListener() {
+
+            @Override
+            public void onClick(View arg0) {
+                //Toast.makeText(ItemDetailActivity.this, "Not supported yet.",Toast.LENGTH_SHORT).show();
+
+
+                Intent intent = new Intent(ItemDetailActivity.this, LoginActivity.class);
+                intent.putExtra("INFORMATION", "");
+                startActivity(intent);
+            }
+        });
+
     }
 
 

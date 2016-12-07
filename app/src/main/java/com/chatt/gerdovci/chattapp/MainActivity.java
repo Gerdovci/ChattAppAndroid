@@ -7,8 +7,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.pette.server.common.ChatMessage;
-
 import java.util.ArrayList;
 
 

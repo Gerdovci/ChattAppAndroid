@@ -16,6 +16,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+
 import com.pette.server.common.LoginRequest;
 import com.pette.server.common.SendMessage;
 
@@ -27,6 +28,8 @@ public class ItemDetailActivity extends ActionBarActivity {
     public static String IP_ADDRESS = "83.227.68.101";
     ListView msgListView;
     public static ChatAdapter chatAdapter;
+    String username;
+    String password;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +43,9 @@ public class ItemDetailActivity extends ActionBarActivity {
         setupActionBar();
 
 
+        username = this.getIntent().getExtras().getString("username");
+        password = this.getIntent().getExtras().getString("password");
+
         Log.d("CHATAPP", "on create");
 
         final EditText msg = (EditText) findViewById(R.id.messageEditText);
@@ -51,7 +57,7 @@ public class ItemDetailActivity extends ActionBarActivity {
         msgListView.setStackFromBottom(true);
 
 
-        final LoginRequest loginRequest = new LoginRequest("pette","1234");
+        final LoginRequest loginRequest = new LoginRequest(username, password);
 
         ArrayList<SendMessage> chatlist = new ArrayList<>();
         chatAdapter = new ChatAdapter(this, chatlist, loginRequest);
@@ -67,36 +73,33 @@ public class ItemDetailActivity extends ActionBarActivity {
         });
 
 
-
-
         WorkerThread workerThread = new WorkerThread();
-       // workerThread.start();
+        // workerThread.start();
 
 
         Thread runnable = new Thread() {
             @Override
             public void run() {
-                Log.d("CHATAPP","loop?");
+                Log.d("CHATAPP", "loop?");
                 Handler mHandler = new Handler(Looper.getMainLooper());
 
 
-
                 Log.d("CHATAPP", "Trying to update convo");
-                UpdateConvo updateConvo = new UpdateConvo(chatAdapter);
+                UpdateConvo updateConvo = new UpdateConvo(chatAdapter, loginRequest);
                 updateConvo.execute();
                 mHandler.postDelayed(this, 2000);
                 mHandler.sendEmptyMessage(1);
             }
         };
 
-       // runnable.start();
+        runnable.start();
     }
 
     class WorkerThread extends Thread {
         public Handler mHandler;
 
         public void run() {
-            Log.d("CHATAPP","Preparing loop");
+            Log.d("CHATAPP", "Preparing loop");
             Looper.prepare();
 
             mHandler = new Handler() {
@@ -125,7 +128,7 @@ public class ItemDetailActivity extends ActionBarActivity {
         mActionBar.setDisplayShowCustomEnabled(true);
 
 
-        Button homeButton = (Button)findViewById(R.id.btn_home);
+        Button homeButton = (Button) findViewById(R.id.btn_home);
         homeButton.setEnabled(true);
 
         homeButton.setOnClickListener(new OnClickListener() {
@@ -142,9 +145,7 @@ public class ItemDetailActivity extends ActionBarActivity {
         });
 
 
-
-
-        Button optionButton = (Button)findViewById(R.id.btn_left);
+        Button optionButton = (Button) findViewById(R.id.btn_left);
         optionButton.setEnabled(true);
 
         optionButton.setOnClickListener(new OnClickListener() {

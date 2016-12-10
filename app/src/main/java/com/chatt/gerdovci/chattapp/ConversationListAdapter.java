@@ -18,56 +18,59 @@ import java.util.ArrayList;
  * Created by gerdovci on 2016-12-07.
  */
 
-public class ConversationListAdapter extends BaseAdapter  {
+public class ConversationListAdapter extends BaseAdapter {
 
-        private static LayoutInflater inflater = null;
-        public ArrayList<ConversationListItems> conversationList;
+    private static LayoutInflater inflater = null;
+    public ArrayList<ConversationListItems> conversationList;
 
-        public ConversationListAdapter(Activity activity, ArrayList<ConversationListItems> list) {
-            conversationList = list;
-            inflater = (LayoutInflater) activity
-                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    public ConversationListAdapter(Activity activity, ArrayList<ConversationListItems> list) {
+        conversationList = list;
+        inflater = (LayoutInflater) activity
+                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-        }
+    }
 
-        @Override
-        public int getCount() {
-            return conversationList.size();
-        }
+    @Override
+    public int getCount() {
+        return conversationList.size();
+    }
 
-        @Override
-        public Object getItem(int position) {
-            return position;
-        }
+    @Override
+    public Object getItem(int position) {
+        return position;
+    }
 
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
 
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            ConversationListItems message = conversationList.get(position);
-            View vi = convertView;
-            if (convertView == null)
-                vi = inflater.inflate(R.layout.conversation_item, null);
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+        ConversationListItems message = conversationList.get(position);
+        View vi = convertView;
+        if (convertView == null)
+            vi = inflater.inflate(R.layout.conversation_item, null);
 
-            ImageView imageView = (ImageView) vi.findViewById(R.id.img_thumbnail);
-            imageView.setImageResource(R.drawable.ic_launcher);
-
-
-            TextView tetView = (TextView) vi.findViewById(R.id.message_sender);
-            tetView.setText(message.getChattroomId());
+        ImageView imageView = (ImageView) vi.findViewById(R.id.img_thumbnail);
+        imageView.setImageResource(R.drawable.ic_launcher);
 
 
-            TextView tetView2 = (TextView) vi.findViewById(R.id.message_body);
-            tetView2.setText(message.getMessage());
+        TextView tetView = (TextView) vi.findViewById(R.id.message_sender);
+        tetView.setText(message.getChattroomId());
 
-            return vi;
-        }
 
-        public void add(ConversationListItems object) {
-            conversationList.add(object);
-        }
+        TextView tetView2 = (TextView) vi.findViewById(R.id.message_body);
+        tetView2.setText(message.getMessage());
 
+        return vi;
+    }
+
+    public void add(ConversationListItems object) {
+        conversationList.add(object);
+    }
+
+    public ConversationListItems getConversation(int pos) {
+        return conversationList.get(pos);
+    }
 }

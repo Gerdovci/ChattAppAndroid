@@ -50,7 +50,8 @@ public class LoginActivity extends AppCompatActivity {
             public void onClick(View v) {
                 // Start the Signup activity
                 Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                startActivityForResult(intent, REQUEST_SIGNUP);
+                intent.putExtra("INFORMATION", "");
+                startActivity(intent);
             }
         });
     }
@@ -71,8 +72,8 @@ public class LoginActivity extends AppCompatActivity {
         progressDialog.setMessage("Authenticating...");
         progressDialog.show();
 
-        String email = _emailText.getText().toString();
-        String password = _passwordText.getText().toString();
+        final String email = _emailText.getText().toString();
+        final String password = _passwordText.getText().toString();
 
         // TODO: Implement your own authentication logic here.
 
@@ -80,7 +81,7 @@ public class LoginActivity extends AppCompatActivity {
                 new Runnable() {
                     public void run() {
                         // On complete call either onLoginSuccess or onLoginFailed
-                        onLoginSuccess();
+                        onLoginSuccess(email, password);
                         // onLoginFailed();
                         progressDialog.dismiss();
                     }
@@ -93,8 +94,9 @@ public class LoginActivity extends AppCompatActivity {
         if (requestCode == REQUEST_SIGNUP) {
             if (resultCode == RESULT_OK) {
 
-                // TODO: Implement successful signup logic here
-                // By default we just finish the Activity and log them in automatically
+                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                intent.putExtra("INFORMATION", "");
+                startActivityForResult(intent, REQUEST_SIGNUP);
                 this.finish();
             }
         }
@@ -106,8 +108,12 @@ public class LoginActivity extends AppCompatActivity {
         moveTaskToBack(true);
     }
 
-    public void onLoginSuccess() {
+    public void onLoginSuccess(String username, String password) {
         _loginButton.setEnabled(true);
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+        intent.putExtra("username", username);
+        intent.putExtra("password", password);
+        startActivity(intent);
         finish();
     }
 

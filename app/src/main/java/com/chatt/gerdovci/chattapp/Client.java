@@ -4,16 +4,8 @@ package com.chatt.gerdovci.chattapp;
  * Created by Gerdovci on 2016-11-29.
  */
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -46,7 +38,6 @@ public class Client extends AsyncTask<Void, Void, Void> {
     String response = "";
     ChatAdapter myChatAdapter;
     EditText myMsg;
-    Socket socket = null;
     List<SendMessage> messages;
     private LoginRequest myLoginRequest;
 
@@ -59,7 +50,6 @@ public class Client extends AsyncTask<Void, Void, Void> {
 
     @Override
     protected Void doInBackground(Void... arg0) {
-        socket = null;
         NioSocketConnector connector = new NioSocketConnector();
         connector.setConnectTimeoutMillis(500);
 
@@ -85,17 +75,19 @@ public class Client extends AsyncTask<Void, Void, Void> {
                 read.awaitUninterruptibly();
 
                 Date date = new Date();
+
+
+                SendMessage sendMessage = new SendMessage("0", "uuid", myMsg.getText().toString(), myLoginRequest.getUsername(), date);
                 if(myChatAdapter.getCount() != 0){
                     date= myChatAdapter.getMessage(myChatAdapter.getCount()-1).getTimeStamp();
                 }
 
-                SendMessage sendMessage = new SendMessage("0", "uuid", myMsg.getText().toString(), myLoginRequest.getUsername(), date);
 
                 writeFuture = session.write(sendMessage);
 
 
                 writeFuture.awaitUninterruptibly();
-                UpdateRequest UpdateRequest = new UpdateRequest("0", "pette", null, null, date);
+                UpdateRequest UpdateRequest = new UpdateRequest("0", myLoginRequest.getUsername(), null, null, date);
                 session.write(UpdateRequest);
                 writeFuture.awaitUninterruptibly();
 
@@ -128,10 +120,6 @@ public class Client extends AsyncTask<Void, Void, Void> {
 
     public static void sendTextMessage(List<SendMessage> messages) {
         if (messages == null) {
-            return;
-        }
-
-        if (chatAdapter.getCount() == messages.size()) {
             return;
         }
 

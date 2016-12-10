@@ -6,15 +6,33 @@ package com.chatt.gerdovci.chattapp;
 
 import android.os.AsyncTask;
 import android.util.Log;
+
+import com.pette.server.common.LoginRequest;
 import com.pette.server.common.SendMessage;
+import com.pette.server.common.UpdateRequest;
+import com.pette.server.common.UpdateResponse;
+
+import org.apache.mina.core.RuntimeIoException;
+import org.apache.mina.core.future.ConnectFuture;
+import org.apache.mina.core.future.ReadFuture;
+import org.apache.mina.core.future.WriteFuture;
+import org.apache.mina.core.service.IoHandlerAdapter;
+import org.apache.mina.core.session.IoSession;
+import org.apache.mina.filter.codec.ProtocolCodecFilter;
+import org.apache.mina.filter.codec.serialization.ObjectSerializationCodecFactory;
+import org.apache.mina.filter.logging.LoggingFilter;
+import org.apache.mina.transport.socket.nio.NioSocketConnector;
+
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static com.chatt.gerdovci.chattapp.ItemDetailActivity.chatAdapter;
@@ -24,70 +42,79 @@ public class UpdateConvo extends AsyncTask<Void, Void, Void> {
     String response = "";
     ChatAdapter myChatAdapter;
     List<SendMessage> messages = new ArrayList<>();
+    LoginRequest myLoginRequest;
 
-    public UpdateConvo(ChatAdapter chatAdapter) {
+    public UpdateConvo(ChatAdapter chatAdapter, LoginRequest loginRequest) {
         myChatAdapter = chatAdapter;
+        myLoginRequest = loginRequest;
     }
 
     @Override
     protected Void doInBackground(Void... arg0) {
-        Socket socket = null;
-        try {
-            socket = new Socket(ItemDetailActivity.IP_ADDRESS, 8080);
-            Log.d("PETTE", "in here");
+
+        NioSocketConnector connector = new NioSocketConnector();
+        connector.setConnectTimeoutMillis(500);
+
+        connector.getFilterChain().addLast("codec",
+                new ProtocolCodecFilter(new ObjectSerializationCodecFactory()));
+
+        connector.getFilterChain().addLast("logger", new LoggingFilter());
+        RequestHandler requestHandler = new RequestHandler(new IoHandlerAdapter());
+        connector.setHandler(new IoHandlerAdapter());
+        IoSession session = null;
 
 
-            DataOutputStream dOut = new DataOutputStream(socket.getOutputStream());
-            // Send first message
-            //dOut.writeByte(1);
-            String sendText="GET UPDATECONVO";
+        for (; ;) {
+            try {
+                ConnectFuture future = connector.connect(new InetSocketAddress(ItemDetailActivity.IP_ADDRESS, 8080));
+                future.awaitUninterruptibly();
+                session = future.getSession();
+                session.getConfig().setUseReadOperation(true);
 
-            sendText +=  "!#" +  chatAdapter.getCount();
-            Log.d("CHATAPP", "send text:" + sendText);
-            dOut.writeUTF(sendText);
-            dOut.flush(); // Send off the data
+                WriteFuture writeFuture = session.write(myLoginRequest);
+                writeFuture.awaitUninterruptibly();
 
-            InputStream inputStream = socket.getInputStream();
+                ReadFuture read = session.read();
+                read.awaitUninterruptibly();
 
-
-            if (inputStream.available() == -1) {
-                socket.close();
-                Log.d("PETTE", "closing down socket");
-                return null;
-            }
-
-            Log.d("CHATAPP", "Reading stream now.");
-            socket.setSoTimeout(400);
-
-            Log.d("CHATAPP", "Reading");
-
-            ObjectInputStream objectInputStream = new ObjectInputStream(
-                    inputStream);
-
-            messages = (List<SendMessage>) objectInputStream.readObject();
-
-            objectInputStream.close();
-            inputStream.close();
-
-        } catch (SocketTimeoutException e) {
-            Log.d("CHATAPP", e.toString());
-        } catch (UnknownHostException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            response = "UnknownHostException: " + e.toString();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            response = "IOException: " + e.toString();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } finally {
-            if (socket != null) {
-                try {
-                    socket.close();
-                } catch (Exception e) {
-                    e.printStackTrace();
+                Date date = new Date();
+                if(myChatAdapter.getCount() != 0){
+                    SendMessage message = myChatAdapter.getMessage(myChatAdapter.getCount() - 1);
+                    Log.d("CHATAP", message.getMessageBody() + "  " + message.getTimeStamp());
+                    date= myChatAdapter.getMessage(myChatAdapter.getCount()-1).getTimeStamp();
+                }else{
+                    date = null;
                 }
+
+
+                UpdateRequest UpdateRequest = new UpdateRequest("0", myLoginRequest.getUsername(), null, null, date);
+                session.write(UpdateRequest);
+                writeFuture.awaitUninterruptibly();
+
+                read = session.read();
+                ReadFuture readFuture = read.awaitUninterruptibly();
+
+                Object message = readFuture.getMessage();
+                if (message instanceof UpdateResponse) {
+
+                    UpdateResponse message1 = (UpdateResponse) (Object) message;
+                    messages = message1.getMessages();
+                    for(SendMessage sendMessage : messages){
+
+                        Log.d("CHATAPP", "always samE?www" + sendMessage.getMessageBody());
+                    }
+                }
+
+                System.err.println("jaha");
+                // wait until the summation is done
+                session.closeNow();
+                connector.dispose();
+                break;
+            } catch (RuntimeIoException e) {
+
+                System.err.println("ErrorBro");
+                e.printStackTrace();
+                break;
             }
         }
         return null;

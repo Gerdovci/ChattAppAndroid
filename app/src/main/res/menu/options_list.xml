@@ -1,0 +1,14 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/optionmenu"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <item
+        android:id="@+id/about_company"
+        android:title="About KG productions." />
+
+    <item
+        android:id="@+id/logout"
+        android:title="Log out" />
+
+</menu>

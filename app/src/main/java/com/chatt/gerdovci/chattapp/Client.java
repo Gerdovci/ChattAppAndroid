@@ -31,8 +31,6 @@ import org.apache.mina.filter.logging.LoggingFilter;
 import org.apache.mina.transport.socket.nio.NioSocketConnector;
 
 
-import static com.chatt.gerdovci.chattapp.ItemDetailActivity.chatAdapter;
-
 public class Client extends AsyncTask<Void, Void, Void> {
 
     String response = "";
@@ -40,6 +38,7 @@ public class Client extends AsyncTask<Void, Void, Void> {
     EditText myMsg;
     List<SendMessage> messages;
     private LoginRequest myLoginRequest;
+    volatile boolean slimUpdate = false;
 
     public Client(ChatAdapter chatAdapter, EditText msg, LoginRequest loginRequest) {
         myChatAdapter = chatAdapter;
@@ -63,7 +62,7 @@ public class Client extends AsyncTask<Void, Void, Void> {
 
         for (; ;) {
             try {
-                ConnectFuture future = connector.connect(new InetSocketAddress(ItemDetailActivity.IP_ADDRESS, 8080));
+                ConnectFuture future = connector.connect(new InetSocketAddress(ItemDetailActivity.IP_ADDRESS, ItemDetailActivity.SERVER_PORT));
                 future.awaitUninterruptibly();
                 session = future.getSession();
                 session.getConfig().setUseReadOperation(true);
@@ -118,22 +117,10 @@ public class Client extends AsyncTask<Void, Void, Void> {
         return null;
     }
 
-    public static void sendTextMessage(List<SendMessage> messages) {
-        if (messages == null) {
-            return;
-        }
-
-        for (SendMessage chatMessage : messages) {
-            if (!chatMessage.getMessageBody().equalsIgnoreCase("")) {
-                chatAdapter.add(chatMessage);
-            }
-        }
-        chatAdapter.notifyDataSetChanged();
-    }
 
     @Override
     protected void onPostExecute(Void result) {
-        sendTextMessage(messages);
+        ItemDetailActivity.sendTextMessage(messages, slimUpdate);
         myMsg.getText().clear();
         super.onPostExecute(result);
     }

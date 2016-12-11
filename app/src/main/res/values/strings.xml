@@ -19,4 +19,5 @@
 
     <!-- ActionBar color strip -->
     <dimen name="colorstrip">5dp</dimen>
+
 </resources>

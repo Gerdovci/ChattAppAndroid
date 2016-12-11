@@ -2,6 +2,7 @@ package com.chatt.gerdovci.chattapp;
 
 
 import android.app.ProgressDialog;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -20,6 +21,10 @@ public class LoginActivity extends AppCompatActivity {
 
     private static final String TAG = "LoginActivity";
     private static final int REQUEST_SIGNUP = 0;
+    public static final String PREFS_NAME = "login_prefs_file";
+    String email;
+    String password;
+
 
     @InjectView(R.id.input_email)
     EditText _emailText;
@@ -35,6 +40,18 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         ButterKnife.inject(this);
+
+
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        String tempEmail = settings.getString("username", email);
+        String tempPassword = settings.getString("password", password);
+
+        if(tempEmail != null && tempEmail.length() > 0 && tempPassword != null && tempPassword.length() > 0){
+            _emailText.setText(tempEmail);
+            _passwordText.setText(tempPassword);
+            onLoginSuccess(tempEmail,tempPassword);
+        }
+
 
         _loginButton.setOnClickListener(new View.OnClickListener() {
 
@@ -72,8 +89,9 @@ public class LoginActivity extends AppCompatActivity {
         progressDialog.setMessage("Authenticating...");
         progressDialog.show();
 
-        final String email = _emailText.getText().toString();
-        final String password = _passwordText.getText().toString();
+
+        email = _emailText.getText().toString();
+        password = _passwordText.getText().toString();
 
         // TODO: Implement your own authentication logic here.
 
@@ -129,7 +147,7 @@ public class LoginActivity extends AppCompatActivity {
         String email = _emailText.getText().toString();
         String password = _passwordText.getText().toString();
 
-        if (email.isEmpty() ) { //|| !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
+        if (email.isEmpty()) { //|| !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
             _emailText.setError("enter a valid email address");
             valid = false;
         } else {
@@ -144,5 +162,20 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         return valid;
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        if (email != null && email.length() > 0 && password != null && password.length() > 0) {
+            SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putString("username", email);
+            editor.putString("password", password);
+
+            // Commit the edits!
+            editor.commit();
+        }
     }
 }

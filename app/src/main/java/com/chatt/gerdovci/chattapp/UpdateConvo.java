@@ -4,6 +4,7 @@ package com.chatt.gerdovci.chattapp;
  * Created by Gerdovci on 2016-11-29.
  */
 
+
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -23,19 +24,11 @@ import org.apache.mina.filter.codec.serialization.ObjectSerializationCodecFactor
 import org.apache.mina.filter.logging.LoggingFilter;
 import org.apache.mina.transport.socket.nio.NioSocketConnector;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
 import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.SocketTimeoutException;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static com.chatt.gerdovci.chattapp.ItemDetailActivity.chatAdapter;
 
 public class UpdateConvo extends AsyncTask<Void, Void, Void> {
 
@@ -43,6 +36,7 @@ public class UpdateConvo extends AsyncTask<Void, Void, Void> {
     ChatAdapter myChatAdapter;
     List<SendMessage> messages = new ArrayList<>();
     LoginRequest myLoginRequest;
+    volatile boolean slimUpdate = false;
 
     public UpdateConvo(ChatAdapter chatAdapter, LoginRequest loginRequest) {
         myChatAdapter = chatAdapter;
@@ -64,9 +58,9 @@ public class UpdateConvo extends AsyncTask<Void, Void, Void> {
         IoSession session = null;
 
 
-        for (; ;) {
+        for (; ; ) {
             try {
-                ConnectFuture future = connector.connect(new InetSocketAddress(ItemDetailActivity.IP_ADDRESS, 8080));
+                ConnectFuture future = connector.connect(new InetSocketAddress(ItemDetailActivity.IP_ADDRESS, ItemDetailActivity.SERVER_PORT));
                 future.awaitUninterruptibly();
                 session = future.getSession();
                 session.getConfig().setUseReadOperation(true);
@@ -78,11 +72,13 @@ public class UpdateConvo extends AsyncTask<Void, Void, Void> {
                 read.awaitUninterruptibly();
 
                 Date date = new Date();
-                if(myChatAdapter.getCount() != 0){
+                if (myChatAdapter.getCount() != 0) {
                     SendMessage message = myChatAdapter.getMessage(myChatAdapter.getCount() - 1);
                     Log.d("CHATAP", message.getMessageBody() + "  " + message.getTimeStamp());
-                    date= myChatAdapter.getMessage(myChatAdapter.getCount()-1).getTimeStamp();
-                }else{
+                    date = myChatAdapter.getMessage(myChatAdapter.getCount() - 1).getTimeStamp();
+                    slimUpdate = true;
+
+                } else {
                     date = null;
                 }
 
@@ -99,7 +95,9 @@ public class UpdateConvo extends AsyncTask<Void, Void, Void> {
 
                     UpdateResponse message1 = (UpdateResponse) (Object) message;
                     messages = message1.getMessages();
-                    for(SendMessage sendMessage : messages){
+
+
+                    for (SendMessage sendMessage : messages) {
 
                         Log.d("CHATAPP", "always samE?www" + sendMessage.getMessageBody());
                     }
@@ -120,10 +118,10 @@ public class UpdateConvo extends AsyncTask<Void, Void, Void> {
         return null;
     }
 
+
     @Override
     protected void onPostExecute(Void result) {
-        Client.sendTextMessage(messages);
+        ItemDetailActivity.sendTextMessage(messages, slimUpdate);
         super.onPostExecute(result);
     }
-
 }
